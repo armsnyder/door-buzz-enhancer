@@ -1,8 +1,10 @@
 __author__ = 'Adam Snyder'
 
-import librosa
+# import librosa
 import pyaudio
 import datetime
+import numpy
+import struct
 
 
 def main():
@@ -21,13 +23,33 @@ def main():
                 buzz()
             last_buzz = now
 
+
 def get_sound(milliseconds):
     """
     Gets an array representation on the waveform from the computer's microphone input
     :param milliseconds: length to listen for
     :return: waveform, sample rate
     """
-    return [0, 0, 0, 0]
+    format = pyaudio.paInt16
+    channels = 1
+    rate = 48000
+    chunk = 1024
+
+    audio = pyaudio.PyAudio()
+    stream = audio.open(format=format, channels=channels, rate=rate, input=True, frames_per_buffer=chunk)
+    v_print('recording...')
+    frames = []
+    for i in range(int(rate/chunk*((milliseconds*1.0)/1000.0))):
+        data = stream.read(chunk)
+        frames.append(data)
+    v_print('finished_recording')
+    stream.stop_stream()
+    stream.close()
+    audio.terminate()
+
+    decoded = numpy.fromstring(b''.join(frames), 'Float16')
+    return numpy.asarray(decoded)
+
 
 def fingerprint_sound(waveform):
     """
@@ -36,6 +58,7 @@ def fingerprint_sound(waveform):
     :return: fingerprint of sound
     """
     return [0, 0, 0, 0]
+
 
 def get_sound_distance(fingerprint_a, fingerprint_b):
     """
@@ -46,6 +69,7 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
     """
     return 0.5
 
+
 def get_reference_fingerprint():
     """
     Returns the fingerprint that we are listening for
@@ -53,12 +77,20 @@ def get_reference_fingerprint():
     """
     return [1, 1, 1, 1]
 
+
 def buzz():
     """
     Activated when a buzz is detected
     :return:
     """
-    print "BUZZ!"
+    v_print("BUZZ at "+datetime.datetime.now().strftime('%H:%M:%S'))
+
+
+def v_print(text):
+    debug = True
+    if debug:
+        print text
+
 
 if __name__ == '__main__':
     main()
