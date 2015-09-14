@@ -9,13 +9,15 @@ import json
 import smtplib
 
 
+WINDOW_SIZE = 100
+
+
 def main():
-    sample_size = 1000
     similarity_threshold = 0.1
     buzz_cooldown = 10000
     last_buzz = datetime.datetime.now()
     while True:
-        sound_sample, sr = get_sound(sample_size)
+        sound_sample, sr = get_sound(100)
         sample_fingerprint = fingerprint_sound(sound_sample, sr)
         reference_fingerprint = get_reference_fingerprint()
         distance = get_sound_distance(sample_fingerprint, reference_fingerprint)
@@ -89,6 +91,16 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
         distance += abs(fingerprint_b[i]-fingerprint_a[i])
 
     return distance
+
+def match(fingerprint_a, fingerprint_b):
+    """
+    Tests if two fingerprints are identical
+    :param fingerprint_a:
+    :param fingerprint_b:
+    :return: True if the fingerprints match
+    """
+    threshold = 100
+    return get_sound_distance(fingerprint_a, fingerprint_b) < threshold
 
 
 def get_reference_fingerprint():

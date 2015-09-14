@@ -1,6 +1,9 @@
 __author__ = 'Adam Snyder'
 
 import unittest
+import os
+import scipy.io.wavfile
+
 import door_buzz_enhancer
 
 
@@ -23,3 +26,41 @@ class Test(unittest.TestCase):
         actual_b = door_buzz_enhancer.get_sound_distance(in_b, in_a)
         self.assertEqual(actual_a, actual_b)
         self.assertEqual(expected, actual_b)
+
+    def test_stimuli(self):
+        def run_file(file_name, source_fingerprint_2):
+            sr_2, sample = scipy.io.wavfile.read(file_name)
+            num_samples = int(door_buzz_enhancer.WINDOW_SIZE * 1.0 / 1000.0 * sr_2)
+            for i in range(0, len(sample)-num_samples, num_samples):
+                subsample = sample[i:i+num_samples]
+                subsample_fingerprint = door_buzz_enhancer.fingerprint_sound(subsample, sr_2)
+                if door_buzz_enhancer.match(source_fingerprint_2, subsample_fingerprint):
+                    return True
+            return False
+
+        source_stimuli = []
+        for (_, _, file_names) in os.walk('source_stimuli'):
+            source_stimuli.extend(file_names)
+        source_stimuli = [str(x).split('.')[0] for x in source_stimuli if len(x) > 0 and x[0] != '.']
+
+        sample_stimuli = []
+        for (_, _, file_names) in os.walk('sample_stimuli'):
+            sample_stimuli.extend(file_names)
+        sample_stimuli = [x for x in sample_stimuli if len(x) > 0 and x[0] != '.']
+
+        for source_stimulus in source_stimuli:
+            sr, source_stimulus_array = scipy.io.wavfile.read('source_stimuli/'+source_stimulus+'.wav')
+            self.assertEqual(48000, sr)
+            source_fingerprint = door_buzz_enhancer.fingerprint_sound(source_stimulus_array, sr)
+            pos_list = []
+            neut_list = []
+            for sample_stimulus in sample_stimuli:
+                if source_stimulus in sample_stimulus:
+                    pos_list.append(sample_stimulus)
+                else:
+                    neut_list.append(sample_stimulus)
+            for pos in pos_list:
+                self.assertTrue(run_file('sample_stimuli/'+pos, source_fingerprint), 'False positive: '+pos)
+            for neut in neut_list:
+                self.assertFalse(run_file('sample_stimuli/'+neut, source_fingerprint), 'False negative: '+neut
+                                 + ' with source' + source_stimulus)
