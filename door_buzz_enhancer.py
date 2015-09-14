@@ -1,10 +1,12 @@
 __author__ = 'Adam Snyder'
 
-# import librosa
+import librosa
 import pyaudio
 import datetime
 import numpy
-import struct
+import math
+import json
+import smtplib
 
 
 def main():
@@ -13,8 +15,8 @@ def main():
     buzz_cooldown = 10000
     last_buzz = datetime.datetime.now()
     while True:
-        sound_sample = get_sound(sample_size)
-        sample_fingerprint = fingerprint_sound(sound_sample)
+        sound_sample, sr = get_sound(sample_size)
+        sample_fingerprint = fingerprint_sound(sound_sample, sr)
         reference_fingerprint = get_reference_fingerprint()
         distance = get_sound_distance(sample_fingerprint, reference_fingerprint)
         if distance < similarity_threshold:
@@ -48,16 +50,26 @@ def get_sound(milliseconds):
     audio.terminate()
 
     decoded = numpy.fromstring(b''.join(frames), 'Float16')
-    return numpy.asarray(decoded)
+    return decoded, rate
 
 
-def fingerprint_sound(waveform):
+def fingerprint_sound(waveform, sample_rate):
     """
     Interprets a sound and returns a comparable value
     :param waveform: sound to process
     :return: fingerprint of sound
     """
-    return [0, 0, 0, 0]
+    waveform = numpy.nan_to_num(waveform)
+    mfcc = librosa.feature.mfcc(waveform, sample_rate)
+    result = []
+    for f in mfcc:
+        total = 0.0
+        for x in f:
+            if not math.isnan(x):
+                total += x
+        total /= len(f)
+        result.append(total)
+    return result
 
 
 def get_sound_distance(fingerprint_a, fingerprint_b):
@@ -67,7 +79,16 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
     :param fingerprint_b:
     :return: value between 0 and 1 -- closer to 0 means more similar
     """
-    return 0.5
+    if len(fingerprint_a) < len(fingerprint_b):
+        size = len(fingerprint_a)
+    else:
+        size = len(fingerprint_b)
+
+    distance = 0.0
+    for i in range(size):
+        distance += abs(fingerprint_b[i]-fingerprint_a[i])
+
+    return distance
 
 
 def get_reference_fingerprint():
@@ -83,7 +104,16 @@ def buzz():
     Activated when a buzz is detected
     :return:
     """
-    v_print("BUZZ at "+datetime.datetime.now().strftime('%H:%M:%S'))
+    message = "BUZZ at "+datetime.datetime.now().strftime('%H:%M:%S')
+    v_print(message)
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(config['login']['username'], config['login']['password'])
+    for destination in config['destinations']:
+        server.sendmail('Buzzer', destination, 'BUZZ')
+    server.close()
 
 
 def v_print(text):

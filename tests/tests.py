@@ -7,7 +7,7 @@ import door_buzz_enhancer
 class Test(unittest.TestCase):
     def test_get_sound(self):
         milliseconds = 100
-        actual = door_buzz_enhancer.get_sound(milliseconds)
+        actual, _ = door_buzz_enhancer.get_sound(milliseconds)
         found_non_zero = False
         for bit in actual:
             if bit != 0:
