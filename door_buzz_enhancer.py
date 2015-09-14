@@ -30,7 +30,7 @@ def main():
 
 def get_sound(milliseconds):
     """
-    Gets an array representation on the waveform from the computer's microphone input
+    Gets an array representation of the waveform from the computer's microphone input
     :param milliseconds: length to listen for
     :return: waveform, sample rate
     """

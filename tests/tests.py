@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
                 else:
                     neut_list.append(sample_stimulus)
             for pos in pos_list:
-                self.assertTrue(run_file('sample_stimuli/'+pos, source_fingerprint), 'False positive: '+pos)
+                self.assertTrue(run_file('sample_stimuli/'+pos, source_fingerprint), 'False negative: '+pos)
             for neut in neut_list:
-                self.assertFalse(run_file('sample_stimuli/'+neut, source_fingerprint), 'False negative: '+neut
+                self.assertFalse(run_file('sample_stimuli/'+neut, source_fingerprint), 'False positive: '+neut
                                  + ' with source' + source_stimulus)
