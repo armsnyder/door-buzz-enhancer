@@ -9,7 +9,7 @@ import json
 import smtplib
 
 
-WINDOW_SIZE = 100
+WINDOW_SIZE = 50
 
 
 def main():
@@ -71,7 +71,7 @@ def fingerprint_sound(waveform, sample_rate):
                 total += x
         total /= len(f)
         result.append(total)
-    return result
+    return result, rms(waveform)
 
 
 def get_sound_distance(fingerprint_a, fingerprint_b):
@@ -81,16 +81,16 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
     :param fingerprint_b:
     :return: value between 0 and 1 -- closer to 0 means more similar
     """
-    if len(fingerprint_a) < len(fingerprint_b):
-        size = len(fingerprint_a)
+    if len(fingerprint_a[0]) < len(fingerprint_b[0]):
+        size = len(fingerprint_a[0])
     else:
-        size = len(fingerprint_b)
+        size = len(fingerprint_b[0])
 
     distance = 0.0
     for i in range(size):
-        distance += abs(fingerprint_b[i]-fingerprint_a[i])
+        distance += abs(fingerprint_b[0][i]-fingerprint_a[0][i])
 
-    return distance
+    return distance, abs(fingerprint_a[1]-fingerprint_b[1])
 
 def match(fingerprint_a, fingerprint_b):
     """
@@ -99,8 +99,10 @@ def match(fingerprint_a, fingerprint_b):
     :param fingerprint_b:
     :return: True if the fingerprints match
     """
-    threshold = 340
-    return get_sound_distance(fingerprint_a, fingerprint_b) < threshold
+    character_threshold = 340
+    volume_threshold = 3000
+    character_dist, volume_dist = get_sound_distance(fingerprint_a, fingerprint_b)
+    return character_dist < character_threshold and volume_dist < volume_threshold
 
 
 def get_reference_fingerprint():
@@ -132,6 +134,12 @@ def v_print(text):
     debug = True
     if debug:
         print text
+
+
+def rms(waveform):
+    squared = [math.pow(x, 2) for x in waveform]
+    mean = reduce(lambda z, y: z+y, squared) / len(squared)
+    return math.sqrt(mean)
 
 
 if __name__ == '__main__':
