@@ -24,7 +24,8 @@ class Test(unittest.TestCase):
         expected = 3+5+8+13
         actual_a = door_buzz_enhancer.get_sound_distance(in_a, in_b)
         actual_b = door_buzz_enhancer.get_sound_distance(in_b, in_a)
-        self.assertEqual(actual_a, actual_b)
+        self.assertEqual(actual_a[0], actual_b[0])
+        self.assertEqual(actual_a[1], actual_b[1]*-1)
         self.assertEqual(expected, actual_b[0])
         self.assertEqual(1, actual_b[1])
 

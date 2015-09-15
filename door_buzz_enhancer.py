@@ -90,7 +90,7 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
     for i in range(size):
         distance += abs(fingerprint_b[0][i]-fingerprint_a[0][i])
 
-    return distance, abs(fingerprint_a[1]-fingerprint_b[1])
+    return distance, fingerprint_a[1]-fingerprint_b[1]
 
 def match(fingerprint_a, fingerprint_b):
     """
@@ -99,10 +99,10 @@ def match(fingerprint_a, fingerprint_b):
     :param fingerprint_b:
     :return: True if the fingerprints match
     """
-    character_threshold = 340
-    volume_threshold = 3000
+    character_threshold = 350
+    volume_threshold = (-300, 1800)
     character_dist, volume_dist = get_sound_distance(fingerprint_a, fingerprint_b)
-    return character_dist < character_threshold and volume_dist < volume_threshold
+    return character_dist < character_threshold and volume_threshold[0] < volume_dist < volume_threshold[1]
 
 
 def get_reference_fingerprint():
