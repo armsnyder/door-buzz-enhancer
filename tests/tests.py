@@ -35,8 +35,8 @@ class Test(unittest.TestCase):
                 subsample = sample[i:i+num_samples]
                 subsample_fingerprint = door_buzz_enhancer.fingerprint_sound(subsample, sr_2)
                 if door_buzz_enhancer.match(source_fingerprint_2, subsample_fingerprint):
-                    return True
-            return False
+                    return True, i
+            return False, 0
 
         source_stimuli = []
         for (_, _, file_names) in os.walk('source_stimuli'):
@@ -60,7 +60,9 @@ class Test(unittest.TestCase):
                 else:
                     neut_list.append(sample_stimulus)
             for pos in pos_list:
-                self.assertTrue(run_file('sample_stimuli/'+pos, source_fingerprint), 'False negative: '+pos)
+                result, sample_num = run_file('sample_stimuli/'+pos, source_fingerprint)
+                self.assertTrue(result, 'False negative: '+pos)
             for neut in neut_list:
-                self.assertFalse(run_file('sample_stimuli/'+neut, source_fingerprint), 'False positive: '+neut
-                                 + ' with source' + source_stimulus)
+                result, sample_num = run_file('sample_stimuli/'+neut, source_fingerprint)
+                if result:
+                    print 'WARNING: False positive on '+source_stimulus+': '+neut+' at sample #'+str(sample_num)

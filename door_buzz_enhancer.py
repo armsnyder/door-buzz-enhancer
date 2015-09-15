@@ -99,7 +99,7 @@ def match(fingerprint_a, fingerprint_b):
     :param fingerprint_b:
     :return: True if the fingerprints match
     """
-    threshold = 100
+    threshold = 340
     return get_sound_distance(fingerprint_a, fingerprint_b) < threshold
 
 
