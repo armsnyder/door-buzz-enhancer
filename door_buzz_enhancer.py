@@ -13,15 +13,13 @@ WINDOW_SIZE = 50
 
 
 def main():
-    similarity_threshold = 0.1
     buzz_cooldown = 10000
     last_buzz = datetime.datetime.now()
+    reference_fingerprint = get_reference_fingerprint()
     while True:
         sound_sample, sr = get_sound(100)
         sample_fingerprint = fingerprint_sound(sound_sample, sr)
-        reference_fingerprint = get_reference_fingerprint()
-        distance = get_sound_distance(sample_fingerprint, reference_fingerprint)
-        if distance < similarity_threshold:
+        if match(sample_fingerprint, reference_fingerprint):
             now = datetime.datetime.now()
             if now - last_buzz > buzz_cooldown:
                 buzz()
@@ -34,13 +32,13 @@ def get_sound(milliseconds):
     :param milliseconds: length to listen for
     :return: waveform, sample rate
     """
-    format = pyaudio.paInt16
+    fmt = pyaudio.paInt16
     channels = 1
     rate = 48000
     chunk = 1024
 
     audio = pyaudio.PyAudio()
-    stream = audio.open(format=format, channels=channels, rate=rate, input=True, frames_per_buffer=chunk)
+    stream = audio.open(format=fmt, channels=channels, rate=rate, input=True, frames_per_buffer=chunk)
     v_print('recording...')
     frames = []
     for i in range(int(rate/chunk*((milliseconds*1.0)/1000.0))):
@@ -91,6 +89,7 @@ def get_sound_distance(fingerprint_a, fingerprint_b):
         distance += abs(fingerprint_b[0][i]-fingerprint_a[0][i])
 
     return distance, fingerprint_a[1]-fingerprint_b[1]
+
 
 def match(fingerprint_a, fingerprint_b):
     """
