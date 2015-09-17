@@ -12,7 +12,7 @@ def begin_stream(listener):
 
     fmt = alsaaudio.PCM_FORMAT_S8
     rate = 8000
-    period = 160
+    period = 1024
 
     card = alsaaudio.cards()[1]
     stream = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, card)

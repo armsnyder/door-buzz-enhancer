@@ -8,7 +8,7 @@ LIFT_DELAY = 20
 SAMPLE_RATE = 8000
 SAMPLE_SIZE = 8
 actions_list = []
-silence_counter = 0
+global_silence_counter = 0
 
 
 def main():
@@ -16,13 +16,13 @@ def main():
 
 
 def listener(data, sample_rate, sample_size, start_time):
-    global actions_list, silence_counter
+    global actions_list, global_silence_counter
     if len(actions_list):
         last_onset = actions_list[-1]
     else:
         last_onset = None
-    onsets, silence_counter = detect_onsets(data, -30, sample_rate, sample_size, LIFT_DELAY, start_time, last_onset,
-                                            silence_counter)
+    onsets, global_silence_counter = detect_onsets(data, -30, sample_rate, sample_size, LIFT_DELAY, start_time,
+                                                   last_onset, global_silence_counter)
     actions_list.extend(onsets)
     for onset in onsets:
         if onset[0]:
