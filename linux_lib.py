@@ -26,8 +26,8 @@ def begin_stream(listener):
         start_time = time.time()
         l, data = stream.read()
         if l:
-            decoded = numpy.fromstring(data, 'int8')
-            listener(decoded.tolist(), rate, 8, start_time)
+            decoded = numpy.fromstring(data, 'float16')
+            listener(decoded.tolist(), rate, 16, start_time)
 
 
 def end_stream():
