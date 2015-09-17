@@ -2,9 +2,10 @@ __author__ = 'Adam Snyder'
 
 import math
 
-from osx_lib import *
+from linux_lib import *
 import wave
 import struct
+import os
 
 LIFT_DELAY = 20
 SAMPLE_RATE = 8000
@@ -80,11 +81,13 @@ def detect_onsets(waveform, volume_threshold, sample_rate=SAMPLE_RATE, sample_si
             last_onset = result[-1]
     # Debug:
     if len(result):
-        f = wave.open("out_"+str(wav_counter)+'.wav', 'w')
+        if not os.path.exists('out'):
+            os.makedirs('out')
+        f = wave.open("out/out_"+str(wav_counter)+'.wav', 'w')
         f.setparams((1, 2, sample_rate, 0, 'NONE', 'not compressed'))
         assert max(waveform) <= 127.0
         assert min(waveform) >= -128.0
-        values = [struct.pack('h', v*(2**7.5)) for v in waveform]
+        values = [struct.pack('h', v) for v in waveform]
         value_str = ''.join(values)
         f.writeframes(value_str)
         f.close()

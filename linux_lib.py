@@ -10,16 +10,16 @@ streaming = False
 def begin_stream(listener):
     global streaming
 
-    fmt = alsaaudio.PCM_FORMAT_S8
+    fmt = alsaaudio.PCM_FORMAT_S16_LE
     rate = 8000
-    period = 1024
+    # period = 1024
 
     card = alsaaudio.cards()[1]
     stream = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, card)
     stream.setchannels(1)
     stream.setrate(rate)
     stream.setformat(fmt)
-    stream.setperiodsize(period)
+    # stream.setperiodsize(period)
     streaming = True
 
     while streaming:
