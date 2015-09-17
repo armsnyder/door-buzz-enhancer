@@ -2,13 +2,17 @@ __author__ = 'Adam Snyder'
 
 import math
 
-from linux_lib import *
+from osx_lib import *
+import wave
+import struct
 
 LIFT_DELAY = 20
 SAMPLE_RATE = 8000
 SAMPLE_SIZE = 8
+
 actions_list = []
 global_silence_counter = 0
+wav_counter = 0
 
 
 def main():
@@ -33,6 +37,7 @@ def listener(data, sample_rate, sample_size, start_time):
 
 def detect_onsets(waveform, volume_threshold, sample_rate=SAMPLE_RATE, sample_size=SAMPLE_SIZE, lift_delay=LIFT_DELAY,
                   start_time=0, last_onset=None, silence_counter=0):
+    global wav_counter  # Debug
     result = []
     sample_counter = 0
     if last_onset and not last_onset[0]:
@@ -73,13 +78,27 @@ def detect_onsets(waveform, volume_threshold, sample_rate=SAMPLE_RATE, sample_si
             db_waveform = []
         if len(result):
             last_onset = result[-1]
+    # Debug:
+    if len(result):
+        f = wave.open("out_"+str(wav_counter)+'.wav', 'w')
+        f.setparams((1, 2, sample_rate, 0, 'NONE', 'not compressed'))
+        assert max(waveform) <= 127.0
+        assert min(waveform) >= -128.0
+        values = [struct.pack('h', v*(2**7.5)) for v in waveform]
+        value_str = ''.join(values)
+        f.writeframes(value_str)
+        f.close()
+        wav_counter += 1
+
     return result, silence_counter
 
 
 def to_db(number, sample_size_in_bits):
     if number == 0:
         return float('-inf')
-    cap = math.pow(2, sample_size_in_bits-1)
+    else:
+        number = float(number)
+    cap = 2**(sample_size_in_bits-1)
     if number > 0:
         cap -= 1
     else:
