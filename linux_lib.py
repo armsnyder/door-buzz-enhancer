@@ -27,6 +27,7 @@ def begin_stream(listener):
         l, data = stream.read()
         if l:
             decoded = numpy.fromstring(data, 'float16')
+            decoded = numpy.nan_to_num(decoded)
             listener(decoded.tolist(), rate, 16, start_time)
 
 
