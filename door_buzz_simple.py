@@ -80,18 +80,18 @@ def detect_onsets(waveform, volume_threshold, sample_rate=SAMPLE_RATE, sample_si
         if len(result):
             last_onset = result[-1]
     # Debug:
-    if len(result):
-        if not os.path.exists('out'):
-            os.makedirs('out')
-        f = wave.open("out/out_"+str(wav_counter)+'.wav', 'w')
-        f.setparams((1, 2, sample_rate, 0, 'NONE', 'not compressed'))
-        # assert max(waveform) <= 127.0
-        # assert min(waveform) >= -128.0
-        values = [struct.pack('h', v) for v in waveform]
-        value_str = ''.join(values)
-        f.writeframes(value_str)
-        f.close()
-        wav_counter += 1
+    # if len(result):
+    #     if not os.path.exists('out'):
+    #         os.makedirs('out')
+    #     f = wave.open("out/out_"+str(wav_counter)+'.wav', 'w')
+    #     f.setparams((1, 2, sample_rate, 0, 'NONE', 'not compressed'))
+    #     # assert max(waveform) <= 127.0
+    #     # assert min(waveform) >= -128.0
+    #     values = [struct.pack('h', v) for v in waveform]
+    #     value_str = ''.join(values)
+    #     f.writeframes(value_str)
+    #     f.close()
+    #     wav_counter += 1
 
     return result, silence_counter
 
