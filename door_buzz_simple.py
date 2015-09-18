@@ -2,7 +2,7 @@ __author__ = 'Adam Snyder'
 
 import math
 
-from osx_lib import *
+from linux_lib import *
 import json
 import smtplib
 import re

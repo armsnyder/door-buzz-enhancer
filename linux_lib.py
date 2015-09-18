@@ -10,7 +10,7 @@ streaming = False
 def begin_stream(listener):
     global streaming
 
-    fmt = alsaaudio.PCM_FORMAT_S16_LE
+    fmt = alsaaudio.PCM_FORMAT_S8
     rate = 8000
     # period = 1024
 
