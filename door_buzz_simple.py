@@ -28,7 +28,7 @@ def listener(data, sample_rate, sample_size, start_time):
         last_onset = actions_list[-1]
     else:
         last_onset = None
-    onsets, global_silence_counter = detect_onsets(data, -30, sample_rate, sample_size, LIFT_DELAY, start_time,
+    onsets, global_silence_counter = detect_onsets(data, -1, sample_rate, sample_size, LIFT_DELAY, start_time,
                                                    last_onset, global_silence_counter)
     actions_list.extend(onsets)
     for onset in onsets:
