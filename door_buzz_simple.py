@@ -2,7 +2,7 @@ __author__ = 'Adam Snyder'
 
 import math
 
-from linux_lib import *
+from osx_lib import *
 import json
 import smtplib
 import re
@@ -14,6 +14,8 @@ SAMPLE_SIZE = 8
 actions_list = []
 global_silence_counter = 0
 wav_counter = 0
+last_buzz = 0
+COOLDOWN = 10
 
 
 def main():
@@ -21,7 +23,7 @@ def main():
 
 
 def listener(data, sample_rate, sample_size, start_time):
-    global actions_list, global_silence_counter
+    global actions_list, global_silence_counter, last_buzz
     if len(actions_list):
         last_onset = actions_list[-1]
     else:
@@ -32,6 +34,10 @@ def listener(data, sample_rate, sample_size, start_time):
     for onset in onsets:
         if onset[0]:
             print ' ON ' + str(onset[1])
+            now = time.time()
+            if now-last_buzz > COOLDOWN:
+                last_buzz = now
+                buzz()
         else:
             print 'OFF '+str(onset[1])
 
@@ -126,6 +132,8 @@ def buzz():
     server.starttls()
     server.login(config['login']['username'], config['login']['password'])
     for destination in config['destinations']:
+        if 'active' in destination and not destination['active']:
+            continue
         clean_number = re.sub(r'\D', '', destination['number'])
         clean_carrier = re.sub(r'\W', '', destination['carrier']).lower()
         final_destination = clean_number+'@'+carriers[clean_carrier]
