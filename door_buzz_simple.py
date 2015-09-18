@@ -3,9 +3,9 @@ __author__ = 'Adam Snyder'
 import math
 
 from linux_lib import *
-import wave
-import struct
-import os
+import json
+import smtplib
+import re
 
 LIFT_DELAY = 20
 SAMPLE_RATE = 8000
@@ -116,6 +116,21 @@ def time_sample(start_time, samples, sample_rate=SAMPLE_RATE):
 
 def sample_time(samples, sample_rate=SAMPLE_RATE):
     return float(samples) / sample_rate
+
+
+def buzz():
+    carriers = {'verizon': 'vtext.com', 'att': 'txt.att.net'}
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(config['login']['username'], config['login']['password'])
+    for destination in config['destinations']:
+        clean_number = re.sub(r'\D', '', destination['number'])
+        clean_carrier = re.sub(r'\W', '', destination['carrier']).lower()
+        final_destination = clean_number+'@'+carriers[clean_carrier]
+        server.sendmail('Buzzer', final_destination, 'BUZZ')
+    server.close()
 
 
 if __name__ == '__main__':
